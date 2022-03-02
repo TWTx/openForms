@@ -15,6 +15,13 @@ KvK, zoals via :ref:`StUF-BG <configuration_prefill_stuf_bg>` of
 In dit voorbeeld gaan we er van uit dat u een
 :ref:`eenvoudig formulier <example_simple_form>` kan maken.
 
+.. note::
+
+    U kunt dit voorbeeld downloaden en :ref:`importeren <manual_export_import>`
+    in Open Formulieren.
+
+    Download: :download:`prefill_kvk.zip <_assets/prefill_kvk.zip>`
+
 
 Configuratie
 ============
