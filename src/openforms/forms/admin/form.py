@@ -111,6 +111,7 @@ class FormAdmin(
         "get_payment_backend_display",
         "get_registration_backend_display",
         "get_object_actions",
+        "category",
     )
     prepopulated_fields = {"slug": ("name",)}
     actions = [
@@ -119,7 +120,12 @@ class FormAdmin(
         "remove_from_maintenance_mode",
         "export_forms",
     ]
-    list_filter = ("active", "maintenance_mode", FormDeletedListFilter)
+    list_filter = (
+        "active",
+        "maintenance_mode",
+        FormDeletedListFilter,
+        "category",
+    )
     search_fields = ("name", "internal_name")
 
     change_list_template = "admin/forms/form/change_list.html"
