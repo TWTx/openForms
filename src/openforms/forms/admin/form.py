@@ -12,7 +12,7 @@ from openforms.payments.admin import PaymentBackendChoiceFieldMixin
 from openforms.registrations.admin import RegistrationBackendFieldMixin
 from openforms.utils.expressions import FirstNotBlank
 
-from ..models import Form, FormDefinition, FormStep
+from ..models import Category, Form, FormDefinition, FormStep
 from ..models.form import FormsExport
 from ..utils import export_form, get_duplicates_keys_for_form
 from .mixins import FormioConfigMixin
@@ -131,8 +131,22 @@ class FormAdmin(
     change_list_template = "admin/forms/form/change_list.html"
 
     def changelist_view(self, request, extra_context=None):
+        categories_show = request.GET.get("category__id__exact")
+        if categories_show:
+            categories_show = [int(categories_show)]
+        else:
+            categories_show = request.GET.get("category__id__in")
+            if categories_show:
+                categories_show = [int(s) for s in categories_show.split(",")]
+            else:
+                categories_show = []
+
         context = {
             "has_change_permission": self.has_change_permission(request),
+            "categories": {
+                "annotated": Category.get_annotated_list(),
+                "show": categories_show,
+            },
         }
         context.update(extra_context or {})
         return super().changelist_view(request, context)

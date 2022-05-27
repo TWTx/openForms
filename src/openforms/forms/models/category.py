@@ -45,5 +45,8 @@ class Category(MP_Node):
         link = format_html('<a href="{url}">{text}</a>', url=url, text=text)
         return link
 
+    def get_branch_ids(self):
+        return [self.id] + [c.id for c in self.get_descendants()]
+
     def __str__(self):
         return self.name
