@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.db.models import Count
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -111,8 +112,8 @@ class FormAdmin(
         "get_payment_backend_display",
         "get_registration_backend_display",
         "get_object_actions",
-        "category",
     )
+    # list_per_page = 5
     prepopulated_fields = {"slug": ("name",)}
     actions = [
         "make_copies",
@@ -120,36 +121,33 @@ class FormAdmin(
         "remove_from_maintenance_mode",
         "export_forms",
     ]
+    list_select = ("category",)
     list_filter = (
         "active",
         "maintenance_mode",
         FormDeletedListFilter,
-        "category",
     )
     search_fields = ("name", "internal_name")
 
     change_list_template = "admin/forms/form/change_list.html"
 
     def changelist_view(self, request, extra_context=None):
-        categories_show = request.GET.get("category__id__exact")
-        if categories_show:
-            categories_show = [int(categories_show)]
-        else:
-            categories_show = request.GET.get("category__id__in")
-            if categories_show:
-                categories_show = [int(s) for s in categories_show.split(",")]
-            else:
-                categories_show = []
+        extra_context = extra_context or {}
+        # TODO: evaluate the changelist queryset filters in the count annotation
+        categories_qs = Category.get_tree(parent=None).annotate(
+            form_count=Count("form")
+        )
+        extra_context["categories"] = Category.get_annotated_list_qs(categories_qs)
 
-        context = {
-            "has_change_permission": self.has_change_permission(request),
-            "categories": {
-                "annotated": Category.get_annotated_list(),
-                "show": categories_show,
-            },
-        }
-        context.update(extra_context or {})
-        return super().changelist_view(request, context)
+        response = super().changelist_view(request, extra_context)
+
+        changelist_instance = response.context_data["cl"]
+        response.context_data["count_no_category"] = (
+            changelist_instance.get_queryset(request)
+            .filter(category__isnull=True)
+            .count()
+        )
+        return response
 
     def get_queryset(self, request):
         # annotate .name for ordering

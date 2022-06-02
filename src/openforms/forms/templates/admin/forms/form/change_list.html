@@ -1,38 +1,9 @@
 {% extends "admin/change_list.html" %}
-{% load i18n admin_urls %}
+{% load i18n static admin_urls admin_list %}
 
-{% block result_list %}
-    {% if categories.annotated %}
-    <a href="?">
-        {% if not categories.show %}
-            <b>{% trans "All categories" %}</b>
-        {% else %}
-            {% trans "All categories" %}
-        {% endif %}
-    </a>
-    {% for category, info in categories.annotated %}
-        {% if info.open %}
-            <ul><li>
-       {% else %}
-            </li>
-            <li>
-        {% endif %}
-
-        <a href="?category__id__in={{ category.get_branch_ids|join:"," }}">
-            {% if category.id in categories.show %}
-                <b>{{ category.name }}</b>
-            {% else %}
-                {{ category.name }}
-            {% endif %}
-        </a>
-
-        {% for close in info.close %}
-            </li>
-            </ul>
-        {% endfor %}
-    {% endfor %}
-    {% endif %}
-    {{ block.super }}
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static "bundles/core-css.css" %}">
+{{ block.super }}
 {% endblock %}
 
 {% block object-tools-items %}
@@ -47,4 +18,38 @@
     {% endif %}
 
     {{ block.super }}
+{% endblock %}
+
+{% block result_list %}
+    {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+
+    <div class="form-category-tree">
+        {% for category, info in categories %}
+
+            {% if info.open %}
+                <div class="form-category__subcategories">
+            {% endif %}
+
+            <div class="form-category" data-id="{{ category.id }}" data-depth="{{ category.depth }}">
+                <div class="form-category__name">{{ category }} ({{ category.form_count }})</div>
+                <div class="form-category__form-list">{# Content managed asynchronously via JS #}</div>
+            </div>
+
+            {% for close in info.close %}
+                </div>
+            {% endfor %}
+
+        {% endfor %}
+
+        {# forms without category #}
+        <div class="form-category__subcategories">
+            <div class="form-category" data-id="">
+                <div class="form-category__name">{% trans "Forms without category" %} ({{ count_no_category }})</div>
+                <div class="form-category__form-list">{# Content managed asynchronously via JS #}</div>
+            </div>
+        </div>
+
+    </div>
+
+    {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
 {% endblock %}

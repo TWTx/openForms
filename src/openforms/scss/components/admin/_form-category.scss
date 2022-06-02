@@ -1,0 +1,26 @@
+.form-category-tree {
+  border-top: 1px solid var(--hairline-color);
+  border-bottom: 1px solid var(--hairline-color);
+}
+
+.form-category {
+  &__name {
+    padding: 8px 10px;
+    background: var(--darkened-bg);
+    color: var(--body-quiet-color);
+    font-weight: 600;
+    border-bottom: 1px solid var(--hairline-color);
+  }
+
+  &__subcategories {
+    padding-left: 1em;
+
+    @at-root .form-category-tree > & {
+      padding-left: 0;
+    }
+  }
+
+  &__form-list {
+    background: var(--body-bg);
+  }
+}
