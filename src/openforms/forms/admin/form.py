@@ -132,6 +132,9 @@ class FormAdmin(
     change_list_template = "admin/forms/form/change_list.html"
 
     def changelist_view(self, request, extra_context=None):
+        if request.GET.get("_async"):
+            return self._async_changelist_view(request)
+
         extra_context = extra_context or {}
         # TODO: evaluate the changelist queryset filters in the count annotation
         categories_qs = Category.get_tree(parent=None).annotate(
@@ -141,13 +144,36 @@ class FormAdmin(
 
         response = super().changelist_view(request, extra_context)
 
-        changelist_instance = response.context_data["cl"]
-        response.context_data["count_no_category"] = (
-            changelist_instance.get_queryset(request)
-            .filter(category__isnull=True)
-            .count()
-        )
+        changelist_instance = response.context_data.get("cl")
+        if changelist_instance:
+            response.context_data["count_no_category"] = (
+                changelist_instance.get_queryset(request)
+                .filter(category__isnull=True)
+                .count()
+            )
         return response
+
+    def _async_changelist_view(self, request):
+        # YOLO
+        request.GET._mutable = True
+        del request.GET["_async"]
+
+        if request.GET["category"] == "":
+            del request.GET["category"]
+            request.GET["category__isnull"] = "1"
+
+        opts = self.model._meta
+        cl = self.get_changelist_instance(request)
+        cl.formset = None
+        context = {
+            **self.admin_site.each_context(request),
+            "module_name": str(opts.verbose_name_plural),
+            "cl": cl,
+            "opts": cl.opts,
+        }
+        return TemplateResponse(
+            request, "admin/forms/form/category_form_list.html", context
+        )
 
     def get_queryset(self, request):
         # annotate .name for ordering

@@ -22,5 +22,10 @@
 
   &__form-list {
     background: var(--body-bg);
+    padding-left: 1em;
+
+    table {
+      table-layout: fixed;
+    }
   }
 }
