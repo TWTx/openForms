@@ -43,7 +43,13 @@ class FormAdminImportExportTests(WebTest):
 
         self.assertEqual(
             zf.namelist(),
-            ["forms.json", "formSteps.json", "formDefinitions.json", "formLogic.json"],
+            [
+                "forms.json",
+                "formSteps.json",
+                "formDefinitions.json",
+                "formLogic.json",
+                "formVariables.json",
+            ],
         )
 
         forms = json.loads(zf.read("forms.json"))
@@ -227,6 +233,7 @@ class FormAdminImportExportTests(WebTest):
                                         {
                                             "id": "eer6qln",
                                             "key": "email",
+                                            "type": "email",
                                         }
                                     ]
                                 },
@@ -246,6 +253,7 @@ class FormAdminImportExportTests(WebTest):
                                         {
                                             "id": "eer6qln",
                                             "key": "email",
+                                            "type": "email",
                                         }
                                     ]
                                 },
