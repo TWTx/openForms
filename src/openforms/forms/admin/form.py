@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.contrib.admin.templatetags.admin_list import result_headers
 from django.db.models import Count
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -146,10 +147,16 @@ class FormAdmin(
 
         changelist_instance = response.context_data.get("cl")
         if changelist_instance:
-            response.context_data["count_no_category"] = (
+            num_without_category = (
                 changelist_instance.get_queryset(request)
                 .filter(category__isnull=True)
                 .count()
+            )
+            response.context_data.update(
+                {
+                    "count_no_category": num_without_category,
+                    "result_headers": list(result_headers(changelist_instance)),
+                }
             )
         return response
 
